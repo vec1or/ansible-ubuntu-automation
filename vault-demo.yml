@@ -1,0 +1,14 @@
+---
+- name: Vault demonstration
+  hosts: local
+
+  vars_files:
+    - vault-lab/secrets.yml
+
+  tasks:
+    - name: Confirm encrypted variable is available
+      ansible.builtin.assert:
+        that:
+          - demo_password is defined
+          - demo_password | length > 0
+        success_msg: "Encrypted variable loaded successfully"

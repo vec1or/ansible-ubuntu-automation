@@ -1,0 +1,19 @@
+---
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Deploy website configuration
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: /etc/nginx/sites-available/ansible-demo.conf
+    mode: "0644"
+  notify: Reload Nginx
+
+- name: Enable website
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/ansible-demo.conf
+    dest: /etc/nginx/sites-enabled/ansible-demo.conf
+    state: link
+  notify: Reload Nginx

@@ -1,0 +1,54 @@
+---
+- name: Configure Ubuntu server
+  hosts: local
+  become: true
+
+  vars:
+    web_directory: /var/www/ansible-site
+
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - git
+          - htop
+          - nginx
+        state: present
+
+    - name: Create webadmins group
+      ansible.builtin.group:
+        name: webadmins
+        state: present
+
+    - name: Create website directory
+      ansible.builtin.file:
+        path: "{{ web_directory }}"
+        state: directory
+        owner: root
+        group: webadmins
+        mode: "2775"
+
+    - name: Create website
+      ansible.builtin.copy:
+        content: "Hello from Ansible Server Automation!\n"
+        dest: "{{ web_directory }}/index.html"
+        mode: "0644"
+
+    - name: Configure Nginx website
+      ansible.builtin.template:
+        src: templates/ansible-site.conf.j2
+        dest: /etc/nginx/sites-available/ansible-site.conf
+        mode: "0644"
+
+    - name: Enable website
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/ansible-site.conf
+        dest: /etc/nginx/sites-enabled/ansible-site.conf
+        state: link
+        
+    - name: Ensure Nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true

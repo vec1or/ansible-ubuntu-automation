@@ -1,0 +1,29 @@
+---
+- name: Configure Nginx website
+  hosts: local
+  become: true
+
+  vars:
+    nginx_port: 8085
+
+  tasks:
+    - name: Deploy Nginx configuration
+      ansible.builtin.template:
+        src: templates/site.conf.j2
+        dest: /etc/nginx/sites-available/ansible-demo.conf
+        mode: "0644"
+        validate: "/usr/sbin/nginx -t -c %s"
+      notify: Reload Nginx
+
+    - name: Enable website
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/ansible-demo.conf
+        dest: /etc/nginx/sites-enabled/ansible-demo.conf
+        state: link
+      notify: Reload Nginx
+
+  handlers:
+    - name: Reload Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded

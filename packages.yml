@@ -1,0 +1,19 @@
+---
+- name: Install useful packages
+  hosts: local
+  become: true
+
+  vars:
+    packages:
+      - curl
+      - git
+      - htop
+      - tree
+      - jq
+
+  tasks:
+    - name: Install packages
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
